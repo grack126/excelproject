@@ -156,3 +156,41 @@ This formula **calculates the average of goals scored for the chosen season and 
     XLOOKUP(MAX(Analysis_sheet!E2:E52),Analysis_sheet!E:E,Analysis_sheet!B:B) & " with " &
      ROUND(MAX(Analysis_sheet!E2:E52),2) & " average goals per game")
 ```
+## Identifying which team won the most games against bookmaker odds
+### Breakdown:
+1. **First I created additional columns showing if the Home or Away team had the lower odds (=IF(IF(AC5238>AA5238,G5238,F5238)=F5238,"H","A")), and another column to see if this team won (=IFERROR(IF(IF(IF(AC5238>AA5238,G5238,F5238)=F5238,"H","A")=J5238,"Y","N"),"NAN"))**  
+2. **I then created a formula to check how many times the given team won against the odds in the given season selected**
+
+### **Formula to calculate number of games won against the odds**
+```excel
+=SUM(
+  COUNTIFS(PremierLeague!B:B,season,PremierLeague!F:F,Analysis_sheet!B2,PremierLeague!AD:AD,"H",PremierLeague!AE:AE,"Y"),
+  COUNTIFS(PremierLeague!B:B,season,PremierLeague!G:G,Analysis_sheet!B2,PremierLeague!AD:AD,"A",PremierLeague!AE:AE,"Y"))
+```
+### **Formula to show results**
+```excel
+=IF(
+  NUMBERVALUE(LEFT(season,4))<2003,
+  "No Odds Yet",
+  CONCAT(XLOOKUP(MAX(Analysis_sheet!F2:F52),Analysis_sheet!F:F,Analysis_sheet!B:B)&" won "&MAX(Analysis_sheet!F2:F52)&" games against the odds"))
+```
+
+## Identifying which team was the best to bet on
+### Breakdown:
+1. This formula calculates **how much money we would have made** for the given team in the given season **if we would have bet £10 on them winning every time they played**.
+
+### **Formula to calculate earnings**
+```excel
+=SUM(
+    SUMIFS(PremierLeague!AA:AA, PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "H") * 10,
+    SUMIFS(PremierLeague!AC:AC, PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "A") * 10,
+    SUMIFS(PremierLeague!AB:AB, PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "D") * 10,
+    SUMIFS(PremierLeague!AB:AB, PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "D") * 10
+) 
+- COUNTIFS(PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "A") * 10
+- COUNTIFS(PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "H") * 10
+```
+### **Formula to show results**
+```excel
+=IF(NUMBERVALUE(LEFT(season,4))<2003,"No odds yet",CONCAT(XLOOKUP(MAX(Analysis_sheet!G2:G52),Analysis_sheet!G:G,Analysis_sheet!B:B)))
+```
