@@ -42,7 +42,7 @@
 
 ## Process
 
-## World Cup Data Analysis in Excel
+## World Cup Data Analysis in Excel (Power Query/Power Pivot skills focused)
 
 ### Data Preparation and Cleaning
 - **Loaded Datasets**: Imported datasets using Power Query.
@@ -80,6 +80,79 @@
 - **Visualisation**:
   - Added slicers for years and group stages and connected them to the pivot charts
   - Added Visualisations that dynamically update based on values selected in the slicers
+<img src="https://drive.google.com/uc?id=1jzxDlVjHaTcAdV2cOeFkJiFpxBzHAdux" alt="World Cup Data Analysis" width="600">
 
+## Premiere League Analysis (Project focus is to showcase use of complex formulas)
 
+### Data Preparation and Cleaning
+- **Loaded Datasets**: Downloaded dataset from Kaggle.
+- **Cleaned Data**: This dataset did not need to be cleaned.
+- **Sorted Data**: Created a new sheet named "Analysis_sheet", where I created a list of unique values for both the teams and the seasons using formulas such as: 
+=UNIQUE(PremierLeague!B2:B10000). Also created a second sheet named "Prem_season_analysis" where I included data validation dropdown for the seasons and added the questions I am aiming to answer.
 
+## Identifying the winner for each season
+### Breakdown:
+1. **Counts home wins (`"H"`)** → Multiplies by **3 points**.  
+2. **Counts away wins (`"A"`)** → Multiplies by **3 points**.  
+3. **Counts away draws (`"D"`)** → Multiplies by **1 point**.  
+4. **Counts home draws (`"D"`)** → Multiplies by **1 point**.  
+
+Each `COUNTIFS` function filters matches for a specific team (`Analysis_sheet!B2`) and season (`season` variable) from the `PremierLeague` sheet. The formula then sums up the total points based on match results.
+
+```excel
+=SUM(
+    COUNTIFS(PremierLeague!F:F,Analysis_sheet!B2,PremierLeague!J:J,"H",PremierLeague!B:B,season)*3,
+    COUNTIFS(PremierLeague!G:G,Analysis_sheet!B2,PremierLeague!J:J,"A",PremierLeague!B:B,season)*3,
+    COUNTIFS(PremierLeague!G:G,Analysis_sheet!B2,PremierLeague!J:J,"D",PremierLeague!B:B,season)*1,
+    COUNTIFS(PremierLeague!F:F,Analysis_sheet!B2,PremierLeague!J:J,"D",PremierLeague!B:B,season)*1
+)
+```
+
+- **Show winner on Prem_season sheet**:
+```excel
+=XLOOKUP(MAX(Analysis_sheet!C2:C52),Analysis_sheet!C:C,Analysis_sheet!B:B)
+```
+## Identifying relegated teams for each season
+### Breakdown:
+This formula **concatenates the names of three teams** based on specific conditions:  
+1. **The two teams with the lowest positive values in Column C**  
+2. **The team with the minimum value in Column M that does an additional check to see if more than one team had the same score, who scored more goals**  
+
+### **Formula**
+```excel
+=CONCAT(
+    XLOOKUP(SMALL(FILTER(Analysis_sheet!C:C, Analysis_sheet!C:C > 0), 1), Analysis_sheet!C:C, Analysis_sheet!B:B) & ", " & 
+    XLOOKUP(SMALL(FILTER(Analysis_sheet!C:C, Analysis_sheet!C:C > 0), 2), Analysis_sheet!C:C, Analysis_sheet!B:B) & ", " & 
+    XLOOKUP(MIN(K:K), Analysis_sheet!E:E, Analysis_sheet!B:B)
+)
+
+=FILTER(Analysis_sheet!$C:$E,Analysis_sheet!$C:$C=SMALL(FILTER(Analysis_sheet!$C:$C, Analysis_sheet!$C:$C > 0), 3))
+```
+### **Formula to show results**
+```excel
+
+=CONCAT(
+    XLOOKUP(SMALL(FILTER(Analysis_sheet!C:C, Analysis_sheet!C:C > 0), 1),Analysis_sheet!C:C,Analysis_sheet!B:B) & ", " &
+     XLOOKUP(SMALL(FILTER(Analysis_sheet!C:C, Analysis_sheet!C:C > 0), 2),Analysis_sheet!C:C,Analysis_sheet!B:B) & ", " &
+     XLOOKUP(MIN(K:K),Analysis_sheet!E:E,Analysis_sheet!B:B) )
+```
+## Identifying the team with the highest average goals per game
+### Breakdown:
+This formula **calculates the average of goals scored for the chosen season and corresponding team** and returns **0 if the team did not play in the chosen season**.
+
+### **Formula**
+```excel
+=IFERROR(
+    AVERAGE(
+        FILTER(PremierLeague!H:H, (PremierLeague!F:F=Analysis_sheet!B2) * (PremierLeague!B:B=season)), 
+        FILTER(PremierLeague!I:I, (PremierLeague!F:F=Analysis_sheet!B2) * (PremierLeague!B:B=season))
+    ), 
+    0
+)
+```
+### **Formula to show results**
+```excel
+=CONCAT(
+    XLOOKUP(MAX(Analysis_sheet!E2:E52),Analysis_sheet!E:E,Analysis_sheet!B:B) & " with " &
+     ROUND(MAX(Analysis_sheet!E2:E52),2) & " average goals per game")
+```
