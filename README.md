@@ -177,15 +177,15 @@ This formula **calculates the average of goals scored for the chosen season and 
 
 ## Identifying which team was the best to bet on
 ### Breakdown:
-1. This formula calculates **how much money we would have made** for the given team in the given season **if we would have bet £10 on them winning every time they played**.
+1. This formula calculates **how much money we would have made** for the given team in the given season **if we would have bet £10 on them winning every time they played**. Also considering that bookmaker would refund half the bet if the game is a draw.
 
 ### **Formula to calculate earnings**
 ```excel
 =SUM(
     SUMIFS(PremierLeague!AA:AA, PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "H") * 10,
     SUMIFS(PremierLeague!AC:AC, PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "A") * 10,
-    SUMIFS(PremierLeague!AB:AB, PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "D") * 10,
-    SUMIFS(PremierLeague!AB:AB, PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "D") * 10
+    COUNTIFS(PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "D") * 5,
+    COUNTIFS(PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "D") * 5
 ) 
 - COUNTIFS(PremierLeague!B:B, season, PremierLeague!F:F, Analysis_sheet!B2, PremierLeague!J:J, "A") * 10
 - COUNTIFS(PremierLeague!B:B, season, PremierLeague!G:G, Analysis_sheet!B2, PremierLeague!J:J, "H") * 10
